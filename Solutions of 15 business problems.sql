@@ -186,6 +186,47 @@ FROM (
 ) AS categorized_content
 GROUP BY 1,2
 ORDER BY 2
+SELECT 
+    release_year,
+    UNNEST(STRING_TO_ARRAY(listed_in, ',')) AS genre,
+    COUNT(*) AS total
+FROM netflix
+GROUP BY release_year, genre
+ORDER BY release_year, total DESC;
+SELECT 
+    country,
+    type,
+    COUNT(*) AS total_content
+FROM netflix
+WHERE country IS NOT NULL
+GROUP BY country, type
+ORDER BY total_content DESC;
+SELECT 
+    release_year,
+    COUNT(*) AS total_releases
+FROM netflix
+GROUP BY release_year
+ORDER BY release_year;
+SELECT 
+    TRIM(UNNEST(STRING_TO_ARRAY(casts, ','))) AS actor,
+    COUNT(DISTINCT country) AS countries
+FROM netflix
+WHERE casts IS NOT NULL
+GROUP BY actor
+ORDER BY countries DESC
+LIMIT 10;
+SELECT 
+    genre,
+    ROUND(AVG(duration_num),2) AS avg_duration
+FROM (
+    SELECT 
+        UNNEST(STRING_TO_ARRAY(listed_in, ',')) AS genre,
+        CAST(SPLIT_PART(duration, ' ', 1) AS INT) AS duration_num
+    FROM netflix
+    WHERE type = 'Movie' AND duration LIKE '%min%'
+) sub
+GROUP BY genre
+ORDER BY avg_duration DESC;
 
 
 
