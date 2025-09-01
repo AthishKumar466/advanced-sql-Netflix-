@@ -255,6 +255,65 @@ GROUP BY category;
 ```
 
 **Objective:** Categorize content as 'Bad' if it contains 'kill' or 'violence' and 'Good' otherwise. Count the number of items in each category.
+**extended and customized**
+```sql
+Fastest-Growing Content Categories
+SELECT 
+    release_year,
+    UNNEST(STRING_TO_ARRAY(listed_in, ',')) AS genre,
+    COUNT(*) AS total
+FROM netflix
+GROUP BY release_year, genre
+ORDER BY release_year, total DESC;
+```
+Compare Movies vs. TV Shows Across Regions
+```sql
+SELECT 
+    country,
+    type,
+    COUNT(*) AS total_content
+FROM netflix
+WHERE country IS NOT NULL
+GROUP BY country, type
+ORDER BY total_content DESC;
+```
+Trend of Netflix Content Growth Over Time
+```sql
+SELECT 
+    release_year,
+    COUNT(*) AS total_releases
+FROM netflix
+GROUP BY release_year
+ORDER BY release_year;
+```
+Top Actors Across Multiple Countries
+```sql
+SELECT 
+    TRIM(UNNEST(STRING_TO_ARRAY(casts, ','))) AS actor,
+    COUNT(DISTINCT country) AS countries
+FROM netflix
+WHERE casts IS NOT NULL
+GROUP BY actor
+ORDER BY countries DESC
+LIMIT 10;
+```
+Average Movie Duration by Genre
+```sql
+SELECT 
+    genre,
+    ROUND(AVG(duration_num),2) AS avg_duration
+FROM (
+    SELECT 
+        UNNEST(STRING_TO_ARRAY(listed_in, ',')) AS genre,
+        CAST(SPLIT_PART(duration, ' ', 1) AS INT) AS duration_num
+    FROM netflix
+    WHERE type = 'Movie' AND duration LIKE '%min%'
+) sub
+GROUP BY genre
+ORDER BY avg_duration DESC;
+```
+
+
 
 ## Findings and Conclusion
 
